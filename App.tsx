@@ -94,7 +94,7 @@ const App: React.FC = () => {
               <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/30">
                 <LayoutList size={24} />
               </div>
-              Task Master
+              To-do List
             </h1>
             <p className="text-gray-500 mt-2 ml-1">Manage your tasks efficiently</p>
           </div>
