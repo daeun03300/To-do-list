@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Todo, FilterType } from './types';
 import { TodoForm } from './components/TodoForm';
 import { TodoItem } from './components/TodoItem';
-import { Search, ListFilter, LayoutList } from 'lucide-react';
+import { CalendarView } from './components/CalendarView';
+import { Search, ListFilter, LayoutList, Calendar } from 'lucide-react';
 
 const App: React.FC = () => {
   // State
@@ -10,6 +11,7 @@ const App: React.FC = () => {
   const [filter, setFilter] = useState<FilterType>(FilterType.ALL);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
 
   // Load from LocalStorage
   useEffect(() => {
@@ -85,7 +87,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         
         {/* Header */}
         <header className="mb-8 text-center sm:text-left sm:flex sm:items-end sm:justify-between">
@@ -94,9 +96,9 @@ const App: React.FC = () => {
               <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/30">
                 <LayoutList size={24} />
               </div>
-              To-do List for Daeun
+              To-do List for 다은
             </h1>
-            <p className="text-gray-500 mt-2 ml-1">Manage your tasks efficiently</p>
+            <p className="text-gray-500 mt-2 ml-1">나의 일정을 관리하는 웹 페이지</p>
           </div>
           
           <div className="mt-4 sm:mt-0 text-sm text-gray-400 font-medium bg-white px-3 py-1 rounded-full border shadow-sm">
@@ -104,8 +106,8 @@ const App: React.FC = () => {
           </div>
         </header>
 
-        {/* Controls: Filter & Search */}
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
+        {/* Controls: Filter, Search & View */}
+        <div className="bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row gap-3 items-center justify-between">
           {/* Search */}
           <div className="relative w-full md:w-64">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -120,57 +122,83 @@ const App: React.FC = () => {
             />
           </div>
 
-          {/* Filter Tabs */}
-          <div className="flex p-1 bg-gray-100 rounded-xl w-full md:w-auto">
-            {(Object.values(FilterType) as FilterType[]).map((f) => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 capitalize ${
-                  filter === f 
-                    ? 'bg-white text-primary shadow-sm' 
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {f.toLowerCase()}
-              </button>
-            ))}
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            {/* Filter Tabs */}
+            <div className="flex p-1 bg-gray-100 rounded-xl w-full sm:w-auto">
+                {(Object.values(FilterType) as FilterType[]).map((f) => (
+                <button
+                    key={f}
+                    onClick={() => setFilter(f)}
+                    className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 capitalize ${
+                    filter === f 
+                        ? 'bg-white text-primary shadow-sm' 
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                >
+                    {f.toLowerCase()}
+                </button>
+                ))}
+            </div>
+
+            {/* View Toggle */}
+            <div className="flex p-1 bg-gray-100 rounded-xl w-full sm:w-auto shrink-0">
+                <button
+                    onClick={() => setViewMode('list')}
+                    className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg transition-all flex items-center justify-center gap-2 text-sm font-medium ${viewMode === 'list' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-600'}`}
+                    title="List View"
+                >
+                    <LayoutList size={16} />
+                    <span className="sm:hidden">List</span>
+                </button>
+                <button
+                    onClick={() => setViewMode('calendar')}
+                    className={`flex-1 sm:flex-none px-3 py-1.5 rounded-lg transition-all flex items-center justify-center gap-2 text-sm font-medium ${viewMode === 'calendar' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-600'}`}
+                    title="Calendar View"
+                >
+                    <Calendar size={16} />
+                    <span className="sm:hidden">Calendar</span>
+                </button>
+            </div>
           </div>
         </div>
 
         {/* Input Form */}
         <TodoForm onAdd={handleAddTodo} />
 
-        {/* Todo List */}
-        <div className="space-y-1">
-          {sortedTodos.length === 0 ? (
-            <div className="text-center py-16 px-4 bg-white rounded-2xl border border-dashed border-gray-300">
-              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ListFilter size={32} className="text-gray-300" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900">No tasks found</h3>
-              <p className="text-gray-500 text-sm mt-1">
-                {searchQuery 
-                  ? `No tasks match "${searchQuery}"` 
-                  : "Start by adding a new task above!"}
-              </p>
+        {/* Main Content */}
+        {viewMode === 'list' ? (
+            <div className="space-y-1 animate-in fade-in duration-300 slide-in-from-bottom-2">
+            {sortedTodos.length === 0 ? (
+                <div className="text-center py-16 px-4 bg-white rounded-2xl border border-dashed border-gray-300">
+                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <ListFilter size={32} className="text-gray-300" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900">No tasks found</h3>
+                <p className="text-gray-500 text-sm mt-1">
+                    {searchQuery 
+                    ? `No tasks match "${searchQuery}"` 
+                    : "Start by adding a new task above!"}
+                </p>
+                </div>
+            ) : (
+                sortedTodos.map(todo => (
+                <TodoItem
+                    key={todo.id}
+                    todo={todo}
+                    onToggle={handleToggleTodo}
+                    onDelete={handleDeleteTodo}
+                    onUpdate={handleUpdateTodo}
+                    onAddSubtasks={handleAddSubtasks}
+                />
+                ))
+            )}
             </div>
-          ) : (
-            sortedTodos.map(todo => (
-              <TodoItem
-                key={todo.id}
-                todo={todo}
-                onToggle={handleToggleTodo}
-                onDelete={handleDeleteTodo}
-                onUpdate={handleUpdateTodo}
-                onAddSubtasks={handleAddSubtasks}
-              />
-            ))
-          )}
-        </div>
+        ) : (
+            <CalendarView todos={filteredTodos} onToggle={handleToggleTodo} />
+        )}
         
         {/* Footer Info */}
-        {todos.length > 0 && (
+        {todos.length > 0 && viewMode === 'list' && (
             <div className="mt-8 text-center text-xs text-gray-400">
                 <p>Double-click or use the edit button to modify tasks.</p>
                 <p className="mt-1">Tasks past their due date are highlighted in red.</p>
