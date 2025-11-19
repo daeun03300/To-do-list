@@ -1,0 +1,5 @@
+{
+  "name": "Smart Todo List",
+  "description": "A feature-rich Todo List application with due dates, filtering, search, and AI-powered task breakdown.",
+  "requestFramePermissions": []
+}
